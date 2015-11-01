@@ -9,6 +9,8 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <sys/ptrace.h>
+#include <sys/reg.h>
+#include <sys/user.h>
 
 typedef	struct 		s_line
 {
@@ -21,5 +23,7 @@ void	gdb();
 void	line_editor_init();
 t_line	get_line();
 void	line_editor_end();
+int		wait_event(int child, int *status);
+void	load_sym(char *file);
 
 #endif

@@ -8,7 +8,7 @@ void do_father(int child)
 	if (!WIFSTOPPED(status))
 		exit(-1);
 	ptrace(PTRACE_SEIZE, child, 0, 0);
-	ptrace(PTRACE_CONT, child, 0, 0);
+	wait_event(child, &status);
 }
 
 void	do_child(char **argv)
@@ -38,6 +38,7 @@ int		start_trace(char **argv)
 void	gdb(char **argv)
 {
 	line_editor_init();
+	load_sym(argv[0]);
 	int		ret;
 	while (1)
 	{
