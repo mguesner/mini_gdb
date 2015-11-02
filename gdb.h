@@ -11,19 +11,28 @@
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 #include <sys/user.h>
+#include <stdio.h>
 
-typedef	struct 		s_line
+
+typedef	struct 					s_line
 {
-	char			*line;
-	int				size;
-	int				allocated_size;
-}					t_line;
+	char						*line;
+	int							size;
+	int							allocated_size;
+}								t_line;
+
+typedef struct 					s_env
+{
+	int							child;
+	struct user_regs_struct		regs;
+}								t_env;
 
 void	gdb();
 void	line_editor_init();
 t_line	get_line();
 void	line_editor_end();
-int		wait_event(int child, int *status);
+int		wait_event(t_env *e, int *status);
 void	load_sym(char *file);
+void	back_trace(t_env *e);
 
 #endif

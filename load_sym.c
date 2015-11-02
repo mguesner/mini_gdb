@@ -42,14 +42,14 @@ void	load_sym(char *file)
 		if (!strcmp(str_tbl + section->sh_name, ".strtab"));
 		{
 			sym_str_tbl = (char *)(file_start + section->sh_offset);
-			write(1, sym_str_tbl, section->sh_size);
+			// write(1, sym_str_tbl, section->sh_size);
 		}
 		off += sizeof(Elf64_Shdr);
 	}
 	Elf64_Sym *curr_sym = sym;
 	while((void *)curr_sym < ((void *)sym) + sym_size)
 	{
-		printf("\nName: %s, Addr: 0x%lx\n", sym_str_tbl + curr_sym->st_name, curr_sym->st_value);
+		// printf("Name: %s, Addr: 0x%lx\n", sym_str_tbl + curr_sym->st_name, curr_sym->st_value);
 		curr_sym = curr_sym + 1;
 	}
 }

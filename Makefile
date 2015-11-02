@@ -4,7 +4,8 @@ OBJ = main.o\
 	  gdb.o\
 	  line_editor.o\
 	  wait_event.o\
-	  load_sym.o
+	  load_sym.o\
+	  back_trace.o
 
 
 CC = clang -g -O3 -Wall -Wextra -Werror

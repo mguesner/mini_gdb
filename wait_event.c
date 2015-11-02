@@ -37,17 +37,16 @@ char *signaux[] =
     [31] = "SIGSYS"
 };
 
-int		wait_event(int child, int *status)
+int		wait_event(t_env *e, int *status)
 {
-	ptrace(PTRACE_CONT, child, 0, 0);
-	waitpid(child, status, 0);
+	ptrace(PTRACE_CONT, e->child, 0, 0);
+	waitpid(e->child, status, 0);
 	if (WIFSTOPPED(*status) && WSTOPSIG(*status) & 0x80)
         return 0;
     if (WIFEXITED(*status) || WIFSIGNALED(*status))
         return -1;
     printf("Program received signal %s\n", signaux[WSTOPSIG(*status)]);
-    struct user_regs_struct regs;
-	ptrace(PTRACE_GETREGS, child, NULL, &regs);
-	printf("0x%.16llx\n", regs.rip);
+	ptrace(PTRACE_GETREGS, e->child, NULL, &e->regs);
+	printf("0x%.16llx\n", e->regs.rip);
     return WSTOPSIG(*status);
 }
