@@ -5,8 +5,42 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "gdb.h"
 
-void	load_sym(char *file)
+void	swap(t_sym *tab1, t_sym *tab2)
+{
+	long tmp1;
+	char	*tmp2;
+	tmp1 = tab1->addr;
+	tmp2 = tab1->name;
+	tab1->addr = tab2->addr;
+	tab1->name = tab2->name;
+	tab2->addr = tmp1;
+	tab2->name = tmp2;
+}
+
+void	sort_array(t_sym *array, int begin, int end)
+{
+	if (end > begin) {
+      long pivot = (array + begin)->addr;
+      int l = begin + 1;
+      int r = end;
+      while(l < r) {
+         if ((array + l)->addr <= pivot)
+            l += 1;
+         else if ((array + r)->addr > pivot)
+            r -= 1;
+         else if ( l < r )
+            swap(array+l, array+r);
+      }
+      l -= 1;
+      swap(array+begin, array+l);
+      sort_array(array, begin, l);
+      sort_array(array, r, end);
+   }
+}
+
+void	load_sym(char *file, t_env *e)
 {
 	int fd = open(file, O_RDONLY);
 	struct stat buf;
@@ -47,9 +81,26 @@ void	load_sym(char *file)
 		off += sizeof(Elf64_Shdr);
 	}
 	Elf64_Sym *curr_sym = sym;
+	e->sym_tab = malloc(sym_size / sizeof(Elf64_Sym) * sizeof(t_sym));
+	int i = 0;
 	while((void *)curr_sym < ((void *)sym) + sym_size)
 	{
-		// printf("Name: %s, Addr: 0x%lx\n", sym_str_tbl + curr_sym->st_name, curr_sym->st_value);
+		if (ELF64_ST_TYPE(curr_sym->st_info) == STT_FUNC)
+		{
+			// printf("Name: %s, Addr: 0x%lx, bind: %d\n", sym_str_tbl + curr_sym->st_name
+			// 	, curr_sym->st_value, ELF64_ST_BIND(curr_sym->st_info));
+			e->sym_tab[i].addr = curr_sym->st_value;
+			e->sym_tab[i].name = sym_str_tbl + curr_sym->st_name;
+			i++;
+		}
 		curr_sym = curr_sym + 1;
+	}
+	e->size_sym_tab = i;
+	sort_array(e->sym_tab, 0, e->size_sym_tab);
+	i = 0;
+	while (i < e->size_sym_tab)
+	{
+		printf("Name: %s, Addr: 0x%lx\n", e->sym_tab[i].name , e->sym_tab[i].addr );
+		i++;
 	}
 }

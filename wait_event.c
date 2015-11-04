@@ -1,5 +1,4 @@
 #include "gdb.h"
-#include <stdio.h>
 
 char *signaux[] =
 {
@@ -41,12 +40,26 @@ int		wait_event(t_env *e, int *status)
 {
 	ptrace(PTRACE_CONT, e->child, 0, 0);
 	waitpid(e->child, status, 0);
-	if (WIFSTOPPED(*status) && WSTOPSIG(*status) & 0x80)
+	if (WIFSTOPPED(*status) && ((*status) >> 8) == (SIGTRAP | (PTRACE_EVENT_EXEC<<8)))
         return 0;
+    if (WIFSTOPPED(*status) && WSTOPSIG(*status) == SIGTRAP)
+    {
+    	ptrace(PTRACE_GETREGS, e->child, NULL, &e->regs);
+    	t_node_break	*curr = e->lst_break.begin;
+    	while(curr)
+    	{
+    		if (curr->addr + 1 == e->regs.rip)
+    			break;
+    		curr = curr->next;
+    	}
+    	e->current_break = curr;
+    	printf("Breakpoint %d, 0x%.16llx in %s()\n", curr->num + 1, e->regs.rip - 1, get_current_sym(*e, e->regs.rip));
+    	return 0;
+    }
     if (WIFEXITED(*status) || WIFSIGNALED(*status))
         return -1;
     printf("Program received signal %s\n", signaux[WSTOPSIG(*status)]);
 	ptrace(PTRACE_GETREGS, e->child, NULL, &e->regs);
-	printf("0x%.16llx\n", e->regs.rip);
+	printf("0x%.16llx in %s()\n", e->regs.rip, get_current_sym(*e, e->regs.rip));
     return WSTOPSIG(*status);
 }

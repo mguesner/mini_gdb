@@ -5,7 +5,10 @@ OBJ = main.o\
 	  line_editor.o\
 	  wait_event.o\
 	  load_sym.o\
-	  back_trace.o
+	  back_trace.o\
+	  get_current_sym.o\
+	  breakpoint.o \
+	  cont.o
 
 
 CC = clang -g -O3 -Wall -Wextra -Werror
